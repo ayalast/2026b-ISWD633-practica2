@@ -57,21 +57,21 @@ cd C:\Users\USER\Desktop\Practicas-Docker\practica2
 docker build --progress=plain -t practica2-web:1.0 .
 ```
 
-Para que CentOS 7 pudiera instalar Apache se cambiaron sus repositorios a `vault.centos.org/7.9.2009`, pues esa versión terminó su soporte. El cambio está en el [Dockerfile](Dockerfile). Se conserva CentOS para seguir el ejemplo de la guía. Referencia: [fin de soporte de CentOS Linux](https://www.centos.org/centos-linux-eol/).
+CentOS 7 ya terminó su soporte y hubo que usar `vault.centos.org/7.9.2009` para poder instalar Apache. El cambio quedó en el [Dockerfile](Dockerfile). Se mantuvo CentOS para seguir el ejemplo de la guía. La fecha de soporte está en la [página de CentOS Linux](https://www.centos.org/centos-linux-eol/).
 
 **¿Cuántos pasos se han ejecutado?**
-El Dockerfile tiene 6 instrucciones: FROM, dos RUN, COPY, EXPOSE y CMD. BuildKit mostró 4 pasos principales numerados `[1/4]` a `[4/4]`: la base, la actualización, la instalación de Apache y la copia de la web. EXPOSE y CMD quedan en la configuración de la imagen; no crean capas con archivos. También aparecen tareas internas de carga del contexto y exportación.
+El Dockerfile tiene 6 instrucciones, que son FROM, dos RUN, COPY, EXPOSE y CMD. En la construcción aparecieron 4 pasos principales desde `[1/4]` hasta `[4/4]`. Corresponden a cargar la base, actualizarla, instalar Apache y copiar la web. EXPOSE y CMD guardan configuración y no crean capas con archivos. Aparte aparecen las tareas internas para cargar el contexto y exportar la imagen.
 
 ### Inspeccionar la imagen creada
 ```powershell
 docker image inspect practica2-web:1.0
 ```
 
-La imagen es Linux/amd64, declara `80/tcp` y tiene 4 capas de archivos. La captura muestra en el navegador los campos de la salida real de `docker image inspect`.
+La imagen es Linux/amd64, declara `80/tcp` y tiene 4 capas de archivos. En la captura se ven los datos que devolvió `docker image inspect`, mostrados en el navegador.
 
 ![Inspección de la imagen practica2-web:1.0](capturas/inspeccion-imagen.png)
 
-Salida completa: [imagen-1.0.json](evidencias/imagen-1.0.json).
+La salida completa quedó en [imagen-1.0.json](evidencias/imagen-1.0.json).
 
 **Modificar el archivo index.html para incluir su nombre y luego crear una nueva versión de la imagen anterior**
 
@@ -83,11 +83,11 @@ docker build --progress=plain -t practica2-web:2.0 .
 
 **¿Cuántos pasos se han ejecutado? ¿Observa algo diferente en la creación de la imagen**
 
-Se mostraron otra vez los 4 pasos principales. Los dos RUN aparecieron como `CACHED`: Docker reutilizó la actualización de CentOS y la instalación de Apache. COPY se volvió a ejecutar porque cambió `index.html`. No fue necesario instalar todos los paquetes otra vez.
+Aparecieron otra vez los 4 pasos principales. Los dos RUN salieron como `CACHED` porque Docker ya tenía guardadas la actualización de CentOS y la instalación de Apache. COPY sí se repitió porque cambió `index.html`. Así no tuvo que instalar todos los paquetes otra vez.
 
-Registro de esa construcción: [build-2.0.log](evidencias/build-2.0.log).
+El registro de esa construcción quedó en [build-2.0.log](evidencias/build-2.0.log).
 
-Al probar el reinicio del contenedor apareció un problema con `apachectl`: el wrapper de esta versión ya no acepta esos argumentos y podía dejar un archivo PID que impedía arrancar otra vez. En la versión 2.0 se cambió CMD a `["/usr/sbin/httpd", "-D", "FOREGROUND"]` para ejecutar Apache directamente. Después del cambio, el contenedor respondió antes y después de reiniciar Docker Desktop.
+Al reiniciar el contenedor apareció un problema con `apachectl` porque esta versión ya no acepta esos argumentos. También podía quedar un archivo PID que impedía arrancar de nuevo. En la versión 2.0 se puso `["/usr/sbin/httpd", "-D", "FOREGROUND"]` en CMD para iniciar Apache directamente. Con ese cambio la web respondió antes y después de reiniciar Docker Desktop.
 
 ## Mecanismo de caché
 Docker usa una caché para reutilizar resultados de una construcción anterior. Instrucciones como RUN y COPY pueden crear capas con archivos. Otras, como CMD y EXPOSE, modifican la configuración de la imagen. Si cambia un paso, los que dependen de él deben volver a evaluarse.
@@ -104,12 +104,12 @@ docker port web-apache
 ```
 
 ### ¿Con que puerto host se está realizando el mapeo?
-Docker asignó `0.0.0.0:32768 -> 80/tcp`. La web quedó disponible en http://localhost:32768/ y respondió HTTP 200 mostrando `Bryan Ayala`. El puerto se asigna automáticamente y puede cambiar si se recrea el contenedor.
+El puerto que apareció fue `0.0.0.0:32768 -> 80/tcp`. Al abrir http://localhost:32768/ salió la página con `Bryan Ayala` y respondió HTTP 200. Docker elige el puerto automáticamente y puede cambiar si se crea de nuevo el contenedor.
 
 ![Página servida por Apache con el nombre cambiado](capturas/web-apache.png)
 
 **¿Qué es una imagen huérfana?**
-Una imagen dangling es una imagen sin etiqueta que no está referenciada por un contenedor. Puede quedar al volver a construir usando una etiqueta que ya existía. No es lo mismo que una imagen etiquetada que simplemente no tiene contenedores en ejecución.
+Es una imagen que quedó sin etiqueta y que ningún contenedor usa. Puede pasar al construir otra imagen con una etiqueta que ya existía. Tener una imagen con etiqueta y sin contenedores encendidos no significa que sea dangling.
 
 ### Identificar imágenes huérfanas
 ```
@@ -127,7 +127,7 @@ Por defecto, este comando elimina imágenes dangling. No elimina todas las imág
 docker image prune
 ```
 
-En la primera comprobación no había imágenes dangling y la limpieza devolvió `Total reclaimed space: 0B`. Las versiones 1.0 y 2.0 tenían etiquetas distintas, por lo que crear la segunda no dejó a la primera sin etiqueta.
+En la primera revisión no había imágenes dangling y la limpieza mostró `Total reclaimed space: 0B`. Como las versiones 1.0 y 2.0 tenían etiquetas distintas, la primera conservó su etiqueta al crear la segunda.
 
 ### Para Ejecutar un archivo Dockerfile que tiene otro nombre
 ```

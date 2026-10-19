@@ -10,14 +10,14 @@ Asignar núcleos de CPU específicos:
 ```
 
 **¿Como saber el numero de procesadores virtuales que tiene una máquina?**
-En PowerShell se puede consultar el número de procesadores lógicos del equipo:
+En PowerShell se puede ver con estos comandos
 
 ```powershell
 (Get-CimInstance Win32_ComputerSystem).NumberOfLogicalProcessors
 docker info --format '{{.NCPU}}'
 ```
 
-Ambos comandos devolvieron `16` en esta PC. Son procesadores lógicos; el equipo tiene 8 núcleos físicos. En Docker Desktop, la segunda consulta indica los procesadores disponibles para el motor Linux.
+Los dos devolvieron `16` en esta PC. Son procesadores lógicos y el equipo tiene 8 núcleos físicos. El comando de Docker muestra cuántos están disponibles para su motor Linux.
 
 ## Ejemplos
 _Puedes copiar y ejecutar directamente cada uno de los comandos_
@@ -52,4 +52,4 @@ docker exec p2-cpu-13 cat /sys/fs/cgroup/cpuset.cpus.effective
 | `p2-cpu-02` | `0-2` | Puede usar los procesadores lógicos 0, 1 y 2 |
 | `p2-cpu-13` | `1,3` | Puede usar los procesadores lógicos 1 y 3 |
 
-`--cpus` limita cuánto tiempo de CPU se puede consumir. `--cpuset-cpus` indica en qué procesadores se puede ejecutar. Las pruebas verificaron la configuración, sin generar una carga de estrés.
+Con `--cpus` se limita el tiempo de CPU que puede usar el contenedor. Con `--cpuset-cpus` se elige en cuáles procesadores puede trabajar. Se revisaron esos límites sin hacer una prueba de estrés.

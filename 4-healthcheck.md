@@ -10,7 +10,7 @@ Un Healthcheck consta de un comando que se ejecuta periódicamente dentro del co
 ```
 Define el comando que se ejecutará para verificar el estado del contenedor. Este comando depende del tipo de aplicación que se está ejecutando en el contenedor y de la mejor manera de verificar su estado de salud. 
 
-El **|| exit 1** hace que la comprobación devuelva 1 cuando falla. Docker puede marcar el contenedor como `unhealthy`, pero eso por sí solo no reinicia un contenedor independiente. Las políticas de reinicio reaccionan a la salida del proceso principal.
+El **|| exit 1** devuelve 1 si la comprobación falla. Docker puede marcar el contenedor como `unhealthy`, pero no lo reinicia solo por eso. Las políticas de reinicio actúan cuando termina el proceso principal.
 Si no se incluye || exit 1, el comando debe ser cuidadosamente diseñado para devolver un código de salida diferente de 0 en caso de fallo, de lo contrario Docker puede interpretar incorrectamente el estado de salud del contenedor.
 ### Ejemplos de comandos para verificar el estado del contenedor
 Para un servidor web (usando curl):
@@ -89,7 +89,7 @@ docker exec server-nginx mv /tmp/index-healthcheck.html /usr/share/nginx/html/in
 docker inspect server-nginx --format '{{.State.Health.Status}}'
 ```
 
-Se esperó a que Docker registrara cada cambio antes de consultar el estado.
+Después de cada cambio se esperó a que Docker actualizara el estado.
 
 | Situación | Estado | Código de la comprobación | Reinicios |
 | --- | --- | --- | --- |
@@ -97,4 +97,4 @@ Se esperó a que Docker registrara cada cambio antes de consultar el estado.
 | Sin index.html, Nginx devuelve 403 | `unhealthy` después de 3 fallos consecutivos | 1 | 0 |
 | Archivo restaurado | `healthy` | 0 | 0 |
 
-El contenedor siguió encendido durante el fallo. Al devolver el archivo a su lugar, la comprobación volvió a pasar.
+El contenedor siguió encendido aunque la página daba error. Al poner el archivo otra vez en su lugar volvió a aparecer `healthy`.

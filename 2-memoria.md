@@ -26,17 +26,17 @@ Limitar la memoria RAM que el contenedor puede utilizar a 300 megabytes y que el
 docker run -d --name p2-memoria-300 --memory=300m --memory-swap=1g nginx:alpine
 ```
 **¿Cuántos megabytes de memoria swap puede utilizar el contenedor creado anteriormente?**
-Puede usar hasta 724 MiB de swap: `1g = 1024 MiB`, por lo tanto `1024 - 300 = 724 MiB`. Docker interpreta estos sufijos como múltiplos de 1024. El límite de RAM es 300 MiB y el total de RAM más swap es 1024 MiB; la disponibilidad real también depende del host.
+Puede usar hasta 724 MiB de swap porque `1g = 1024 MiB` y `1024 - 300 = 724 MiB`. Docker usa múltiplos de 1024 para estos valores. Quedan 300 MiB de RAM y hasta 724 MiB de swap, aunque también depende de lo que tenga disponible el equipo.
 
-Se verificó la configuración con:
+Para revisar los límites se usaron estos comandos
 
 ```powershell
 docker inspect p2-memoria-300 --format '{{.HostConfig.Memory}} {{.HostConfig.MemorySwap}}'
 docker exec p2-memoria-300 cat /sys/fs/cgroup/memory.max /sys/fs/cgroup/memory.swap.max
 ```
 
-`inspect` devolvió `314572800 1073741824` bytes. Los límites de cgroup fueron `314572800` para RAM y `759169024` para swap, que corresponden a 300 MiB y 724 MiB.
+En `inspect` aparecieron `314572800 1073741824` bytes. En los archivos de cgroup salieron `314572800` para RAM y `759169024` para swap. Esos valores corresponden a 300 MiB y 724 MiB.
 
-El contenedor de 10 MiB también arrancó: `Memory=10485760` y `OOMKilled=false`. Se usaron nombres distintos para poder conservar las dos pruebas.
+El contenedor de 10 MiB también arrancó y mostró `Memory=10485760` y `OOMKilled=false`. Se les puso nombres distintos para poder guardar las dos pruebas.
 
-Referencia: [límites de memoria de Docker](https://docs.docker.com/engine/containers/resource_constraints/).
+Esto se puede revisar en los [límites de memoria de Docker](https://docs.docker.com/engine/containers/resource_constraints/).

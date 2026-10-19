@@ -1,0 +1,66 @@
+[
+    {
+        "Id": "sha256:947911eb1fe1e5294f023cf2b6b63f69a140008580fd2e0c76fad45e5f1ae905",
+        "RepoTags": [
+            "practica2-web:1.0"
+        ],
+        "RepoDigests": [
+            "practica2-web@sha256:947911eb1fe1e5294f023cf2b6b63f69a140008580fd2e0c76fad45e5f1ae905"
+        ],
+        "Comment": "buildkit.dockerfile.v0",
+        "Created": "2026-10-19T20:46:02.865526338Z",
+        "Config": {
+            "ExposedPorts": {
+                "80/tcp": {}
+            },
+            "Env": [
+                "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+            ],
+            "Cmd": [
+                "apachectl",
+                "-D",
+                "FOREGROUND"
+            ],
+            "Labels": {
+                "org.label-schema.build-date": "20201113",
+                "org.label-schema.license": "GPLv2",
+                "org.label-schema.name": "CentOS Base Image",
+                "org.label-schema.schema-version": "1.0",
+                "org.label-schema.vendor": "CentOS",
+                "org.opencontainers.image.created": "2020-11-13 00:00:00+00:00",
+                "org.opencontainers.image.licenses": "GPL-2.0-only",
+                "org.opencontainers.image.title": "CentOS Base Image",
+                "org.opencontainers.image.vendor": "CentOS"
+            },
+            "ArgsEscaped": true
+        },
+        "Architecture": "amd64",
+        "Os": "linux",
+        "Size": 946205941,
+        "RootFS": {
+            "Type": "layers",
+            "Layers": [
+                "sha256:174f5685490326fc0a1c0f5570b8663732189b327007e47ff13d2ca59673db02",
+                "sha256:217d95a50fd26393dbf532a341c271b0fcd64cf8047813ba18025c2153e404d4",
+                "sha256:42529954b542cb59f3fac52d31b63d55248b7f62c5a8cbf8e278c63c45b04875",
+                "sha256:201ec873df3489b5eecd559c97730c418b76ad0013aff8aba5ce01612d2c2b35"
+            ]
+        },
+        "Metadata": {
+            "LastTagTime": "2026-10-19T20:46:17.469644683Z"
+        },
+        "Descriptor": {
+            "mediaType": "application/vnd.oci.image.index.v1+json",
+            "digest": "sha256:947911eb1fe1e5294f023cf2b6b63f69a140008580fd2e0c76fad45e5f1ae905",
+            "size": 856
+        },
+        "Identity": {
+            "Build": [
+                {
+                    "Ref": "g312w45vmk3cw0qlb4pbfuap1",
+                    "CreatedAt": "2026-10-19T20:46:20.9108222Z"
+                }
+            ]
+        }
+    }
+]

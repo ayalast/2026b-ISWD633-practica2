@@ -19,14 +19,14 @@ Copia archivos o directorios desde la máquina host al sistema de archivos del c
 Copia archivos o directorios desde el sistema de archivos de la máquina host al sistema de archivos del contenedor. Aunque es similar a la instrucción COPY, ADD tiene algunas características adicionales, como la capacidad de descomprimir automáticamente archivos y de copiar archivos desde una URL remota.
 
 ### CMD 
-Define el comando predeterminado que se ejecutará cuando se inicie el contenedor. Puede haber solo una instrucción CMD en un Dockerfile. Si se proporciona más de una, solo la última tendrá efecto. Por ejemplo, CMD ["nginx", "-g", "daemon off;"] ejecutará el servidor web Nginx en modo daemon cuando se inicie el contenedor.
+Define el comando predeterminado que se ejecutará cuando se inicie el contenedor. Si se proporciona más de una instrucción CMD, solo la última tendrá efecto. Por ejemplo, CMD ["nginx", "-g", "daemon off;"] ejecutará Nginx en primer plano cuando se inicie el contenedor.
 
 ### ENTRYPOINT
-Configura el comando o el script que se ejecutará cuando se inicie un contenedor basado en la imagen. A diferencia de la instrucción CMD, que especifica el comando predeterminado que se ejecutará y que puede ser sobrescrito desde la línea de comandos al iniciar el contenedor, ENTRYPOINT establece un comando que no se puede sobrescribir fácilmente al iniciar el contenedor.
-Es importante destacar que, si se proporciona un comando en la línea de comandos al iniciar el contenedor (por ejemplo, docker run <imagen> <comando>), este comando se agregará como argumentos al comando especificado en ENTRYPOINT, en lugar de sobrescribirlo. Esto permite que el contenedor sea más versátil y se adapte a diferentes necesidades de uso.
+Configura el comando o el script que se ejecutará cuando se inicie un contenedor basado en la imagen. CMD se puede reemplazar indicando otro comando después del nombre de la imagen. ENTRYPOINT se puede reemplazar con `docker run --entrypoint`.
+Con ENTRYPOINT en formato JSON, lo que se escribe después de la imagen se pasa como argumentos al ejecutable y reemplaza los argumentos predeterminados de CMD.
 
 ### EXPOSE
-Informa a Docker que el contenedor escuchará en un puerto específico en tiempo de ejecución. No abre realmente el puerto, solo documenta que la aplicación dentro del contenedor puede usar dicho puerto. Por ejemplo, EXPOSE 80 expone el puerto 80 en el contenedor, lo que permite que se acceda a la aplicación que se esté ejecutando en ese puerto desde fuera del contenedor.
+Documenta el puerto que usa la aplicación dentro del contenedor. `EXPOSE 80` no publica el puerto en el host. Para entrar desde el host se usa `-p`, o `-P` para publicar automáticamente los puertos declarados con EXPOSE.
 
 ### ENV
 Define variables de entorno dentro del contenedor. Las variables de entorno definidas con ENV estarán disponibles para cualquier proceso en el contenedor durante su ejecución. Por ejemplo, ENV MYSQL_ROOT_PASSWORD=password define una variable de entorno llamada MYSQL_ROOT_PASSWORD con el valor password.
@@ -52,21 +52,45 @@ docker build -t <nombre imagen>:<tag> .
  
 ### Ejecutar el archivo Dockerfile y construir una imagen en la versión 1.0
 No olvides verificar en qué directorio se encuentra el archivo Dockerfile
+```powershell
+cd C:\Users\USER\Desktop\Practicas-Docker\practica2
+docker build --progress=plain -t practica2-web:1.0 .
 ```
 
-```
+Para que CentOS 7 pudiera instalar Apache se cambiaron sus repositorios a `vault.centos.org/7.9.2009`, pues esa versión terminó su soporte. El cambio está en el [Dockerfile](Dockerfile). Se conserva CentOS para seguir el ejemplo de la guía. Referencia: [fin de soporte de CentOS Linux](https://www.centos.org/centos-linux-eol/).
 
 **¿Cuántos pasos se han ejecutado?**
-# RESPONDER 
+El Dockerfile tiene 6 instrucciones: FROM, dos RUN, COPY, EXPOSE y CMD. BuildKit mostró 4 pasos principales numerados `[1/4]` a `[4/4]`: la base, la actualización, la instalación de Apache y la copia de la web. EXPOSE y CMD quedan en la configuración de la imagen; no crean capas con archivos. También aparecen tareas internas de carga del contexto y exportación.
 
 ### Inspeccionar la imagen creada
-# COMPLETAR CON UNA CAPTURA
+```powershell
+docker image inspect practica2-web:1.0
+```
+
+La imagen es Linux/amd64, declara `80/tcp` y tiene 4 capas de archivos. La captura muestra en el navegador los campos de la salida real de `docker image inspect`.
+
+![Inspección de la imagen practica2-web:1.0](capturas/inspeccion-imagen.png)
+
+Salida completa: [imagen-1.0.json](evidencias/imagen-1.0.json).
 
 **Modificar el archivo index.html para incluir su nombre y luego crear una nueva versión de la imagen anterior**
+
+En [web/index.html](web/index.html) se cambió el encabezado a `Bryan Ayala`.
+
+```powershell
+docker build --progress=plain -t practica2-web:2.0 .
+```
+
 **¿Cuántos pasos se han ejecutado? ¿Observa algo diferente en la creación de la imagen**
 
+Se mostraron otra vez los 4 pasos principales. Los dos RUN aparecieron como `CACHED`: Docker reutilizó la actualización de CentOS y la instalación de Apache. COPY se volvió a ejecutar porque cambió `index.html`. No fue necesario instalar todos los paquetes otra vez.
+
+Registro de esa construcción: [build-2.0.log](evidencias/build-2.0.log).
+
+Al probar el reinicio del contenedor apareció un problema con `apachectl`: el wrapper de esta versión ya no acepta esos argumentos y podía dejar un archivo PID que impedía arrancar otra vez. En la versión 2.0 se cambió CMD a `["/usr/sbin/httpd", "-D", "FOREGROUND"]` para ejecutar Apache directamente. Después del cambio, el contenedor respondió antes y después de reiniciar Docker Desktop.
+
 ## Mecanismo de caché
-Docker usa un mecanismo de caché cuando crea imágenes para acelerar el proceso de construcción y evitar la repetición de pasos que no han cambiado. Cada instrucción en un Dockerfile crea una capa en la imagen final. Docker intenta reutilizar las capas de una construcción anterior si no han cambiado, lo que reduce significativamente el tiempo de construcción.
+Docker usa una caché para reutilizar resultados de una construcción anterior. Instrucciones como RUN y COPY pueden crear capas con archivos. Otras, como CMD y EXPOSE, modifican la configuración de la imagen. Si cambia un paso, los que dependen de él deben volver a evaluarse.
 
 - Instrucción FROM: Si la imagen base ya está en el sistema, Docker la reutiliza.
 - Instrucciones de configuración (ENV, RUN, COPY, etc.): Docker verifica si alguna instrucción ha cambiado. Si no, reutiliza la capa correspondiente de la caché.
@@ -74,15 +98,18 @@ Docker usa un mecanismo de caché cuando crea imágenes para acelerar el proceso
 ![mapeo](img/dockerfile-cache.PNG)
 
 ### Crear un contenedor a partir de las imagen creada, mapear todos los puertos
-```
-
+```powershell
+docker run -d --name web-apache -P practica2-web:2.0
+docker port web-apache
 ```
 
 ### ¿Con que puerto host se está realizando el mapeo?
-# COMPLETAR CON LA RESPUESTA
+Docker asignó `0.0.0.0:32768 -> 80/tcp`. La web quedó disponible en http://localhost:32768/ y respondió HTTP 200 mostrando `Bryan Ayala`. El puerto se asigna automáticamente y puede cambiar si se recrea el contenedor.
+
+![Página servida por Apache con el nombre cambiado](capturas/web-apache.png)
 
 **¿Qué es una imagen huérfana?**
-# COMPLETAR CON LA RESPUESTA
+Una imagen dangling es una imagen sin etiqueta que no está referenciada por un contenedor. Puede quedar al volver a construir usando una etiqueta que ya existía. No es lo mismo que una imagen etiquetada que simplemente no tiene contenedores en ejecución.
 
 ### Identificar imágenes huérfanas
 ```
@@ -95,10 +122,12 @@ docker images -f "dangling=true" -q
 ```
 
 ### Eliminar imágenes huérfanas
-Este comando eliminará todas las imágenes que no estén asociadas a ningún contenedor en ejecución. Antes de ejecutarlo, asegúrate de revisar las imágenes que serán eliminadas para evitar la pérdida de imágenes importantes. 
+Por defecto, este comando elimina imágenes dangling. No elimina todas las imágenes sin contenedores en ejecución. La opción `-a` amplía la limpieza a imágenes sin referencias de ningún contenedor, incluso detenido. Hay que revisar la lista antes de confirmar.
 ```
 docker image prune
 ```
+
+En la primera comprobación no había imágenes dangling y la limpieza devolvió `Total reclaimed space: 0B`. Las versiones 1.0 y 2.0 tenían etiquetas distintas, por lo que crear la segunda no dejó a la primera sin etiqueta.
 
 ### Para Ejecutar un archivo Dockerfile que tiene otro nombre
 ```

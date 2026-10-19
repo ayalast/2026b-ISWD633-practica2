@@ -1,0 +1,47 @@
+#0 building with "desktop-linux" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 367B done
+#1 DONE 0.2s
+
+#2 [internal] load metadata for docker.io/library/centos:7
+#2 DONE 0.4s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 70B done
+#3 DONE 0.2s
+
+#4 [internal] load build context
+#4 transferring context: 319B done
+#4 DONE 0.5s
+
+#5 [1/4] FROM docker.io/library/centos:7@sha256:be65f488b7764ad3638f236b7b515b3678369a5124c47b8d32916d6487418ea4
+#5 resolve docker.io/library/centos:7@sha256:be65f488b7764ad3638f236b7b515b3678369a5124c47b8d32916d6487418ea4
+#5 resolve docker.io/library/centos:7@sha256:be65f488b7764ad3638f236b7b515b3678369a5124c47b8d32916d6487418ea4 0.7s done
+#5 DONE 0.8s
+
+#6 [2/4] RUN sed -i 's|^mirrorlist=|#mirrorlist=|g; s|^#baseurl=http://mirror.centos.org/centos/\$releasever|baseurl=https://vault.centos.org/7.9.2009|g' /etc/yum.repos.d/CentOS-*.repo && yum -y update
+#6 CACHED
+
+#7 [3/4] RUN yum -y install httpd && yum clean all
+#7 CACHED
+
+#8 [4/4] COPY ./web /var/www/html
+#8 DONE 0.6s
+
+#9 exporting to image
+#9 exporting layers
+#9 exporting layers 1.3s done
+#9 exporting manifest sha256:96092cda342fcaec4470489bacaca495cb9600664d157194a8427b64b0545fcb
+#9 exporting manifest sha256:96092cda342fcaec4470489bacaca495cb9600664d157194a8427b64b0545fcb 0.3s done
+#9 exporting config sha256:c6660714938e69cd1a96fcaa1821576bdfbcc8fb8c08ed3d8066ae478b6216f4
+#9 exporting config sha256:c6660714938e69cd1a96fcaa1821576bdfbcc8fb8c08ed3d8066ae478b6216f4 0.3s done
+#9 exporting attestation manifest sha256:4e0b2d77b806b740c5f195d24fd803a0ce0d7be1a7df453673281812cb3c185d
+#9 exporting attestation manifest sha256:4e0b2d77b806b740c5f195d24fd803a0ce0d7be1a7df453673281812cb3c185d 0.3s done
+#9 exporting manifest list sha256:7fa022e1a94fd5ac323aaa269aa37f09409b4b479ab74d2582146a40b8ce2ae4
+#9 exporting manifest list sha256:7fa022e1a94fd5ac323aaa269aa37f09409b4b479ab74d2582146a40b8ce2ae4 0.3s done
+#9 naming to docker.io/library/practica2-web:2.0
+#9 naming to docker.io/library/practica2-web:2.0 0.0s done
+#9 unpacking to docker.io/library/practica2-web:2.0
+#9 unpacking to docker.io/library/practica2-web:2.0 0.3s done
+#9 DONE 3.3s

@@ -1,0 +1,193 @@
+{
+  "Fecha": "2026-10-19",
+  "Engine": "29.8.2",
+  "Recursos": {
+    "Containers": [
+      {
+        "Name": "/p2-memoria-10",
+        "Memory": 10485760,
+        "MemorySwap": 20971520,
+        "NanoCPUs": 0,
+        "CPUSet": "",
+        "Status": "running",
+        "OOMKilled": false
+      },
+      {
+        "Name": "/p2-memoria-300",
+        "Memory": 314572800,
+        "MemorySwap": 1073741824,
+        "NanoCPUs": 0,
+        "CPUSet": "",
+        "Status": "running",
+        "OOMKilled": false
+      },
+      {
+        "Name": "/p2-cpu-15",
+        "Memory": 0,
+        "MemorySwap": 0,
+        "NanoCPUs": 1500000000,
+        "CPUSet": "",
+        "Status": "running",
+        "OOMKilled": false
+      },
+      {
+        "Name": "/p2-cpu-02",
+        "Memory": 0,
+        "MemorySwap": 0,
+        "NanoCPUs": 0,
+        "CPUSet": "0-2",
+        "Status": "running",
+        "OOMKilled": false
+      },
+      {
+        "Name": "/p2-cpu-13",
+        "Memory": 0,
+        "MemorySwap": 0,
+        "NanoCPUs": 0,
+        "CPUSet": "1,3",
+        "Status": "running",
+        "OOMKilled": false
+      }
+    ],
+    "CGroupMemory": [
+      "314572800",
+      "759169024"
+    ],
+    "CGroupCPU15": "150000 100000",
+    "CGroupCPU02": "0-2",
+    "CGroupCPU13": "1,3",
+    "LogicalProcessors": 16,
+    "DockerProcessors": "16",
+    "InitialHealth": {
+      "Running": true,
+      "Health": "healthy",
+      "RestartCount": 0,
+      "LastExit": 0
+    },
+    "FailedHealth": {
+      "Running": true,
+      "Health": "unhealthy",
+      "RestartCount": 0,
+      "LastExit": 1,
+      "FailingStreak": 3
+    },
+    "RecoveredHealth": {
+      "Running": true,
+      "Health": "healthy",
+      "RestartCount": 0,
+      "LastExit": 0
+    }
+  },
+  "ReiniciosDuranteEjecucion": [
+    {
+      "Name": "/reinicio-no",
+      "Policy": "no",
+      "Status": "exited",
+      "ExitCode": 0,
+      "RestartCount": 0
+    },
+    {
+      "Name": "/reinicio-always",
+      "Policy": "always",
+      "Status": "restarting",
+      "ExitCode": 1,
+      "RestartCount": 6
+    },
+    {
+      "Name": "/reinicio-unless-stopped",
+      "Policy": "unless-stopped",
+      "Status": "running",
+      "ExitCode": 0,
+      "RestartCount": 4
+    },
+    {
+      "Name": "/reinicio-on-failure",
+      "Policy": "on-failure",
+      "Status": "running",
+      "ExitCode": 0,
+      "RestartCount": 2
+    }
+  ],
+  "DetenidosAntesDeReiniciar": [
+    {
+      "Name": "/reinicio-no",
+      "Policy": "no",
+      "Status": "exited",
+      "ExitCode": 0,
+      "StartedAt": "2026-10-19T20:49:50.156437166Z",
+      "FinishedAt": "2026-10-19T20:49:50.578009529Z"
+    },
+    {
+      "Name": "/reinicio-always",
+      "Policy": "always",
+      "Status": "exited",
+      "ExitCode": 137,
+      "StartedAt": "2026-10-19T20:55:32.179960673Z",
+      "FinishedAt": "2026-10-19T20:55:35.256786882Z"
+    },
+    {
+      "Name": "/reinicio-unless-stopped",
+      "Policy": "unless-stopped",
+      "Status": "exited",
+      "ExitCode": 137,
+      "StartedAt": "2026-10-19T20:55:36.114516358Z",
+      "FinishedAt": "2026-10-19T20:55:38.898032985Z"
+    },
+    {
+      "Name": "/reinicio-on-failure",
+      "Policy": "on-failure",
+      "Status": "exited",
+      "ExitCode": 137,
+      "StartedAt": "2026-10-19T20:55:39.692053413Z",
+      "FinishedAt": "2026-10-19T20:55:42.474260939Z"
+    }
+  ],
+  "DespuesDeReiniciarDocker": [
+    {
+      "Name": "/reinicio-no",
+      "Policy": "no",
+      "Status": "exited",
+      "ExitCode": 0,
+      "RestartCount": 0,
+      "StartedAt": "2026-10-19T20:49:50.156437166Z"
+    },
+    {
+      "Name": "/reinicio-always",
+      "Policy": "always",
+      "Status": "running",
+      "ExitCode": 0,
+      "RestartCount": 0,
+      "StartedAt": "2026-10-19T20:55:53.378064906Z"
+    },
+    {
+      "Name": "/reinicio-unless-stopped",
+      "Policy": "unless-stopped",
+      "Status": "exited",
+      "ExitCode": 137,
+      "RestartCount": 0,
+      "StartedAt": "2026-10-19T20:55:36.114516358Z"
+    },
+    {
+      "Name": "/reinicio-on-failure",
+      "Policy": "on-failure",
+      "Status": "running",
+      "ExitCode": 0,
+      "RestartCount": 0,
+      "StartedAt": "2026-10-19T20:55:53.375471738Z"
+    }
+  ],
+  "OnFailureSalidaCero": {
+    "RestartCount": 0,
+    "ExitCode": 0,
+    "Status": "exited"
+  },
+  "ApacheFinal": {
+    "PuertoHost": 32768,
+    "Cmd": [
+      "/usr/sbin/httpd",
+      "-D",
+      "FOREGROUND"
+    ],
+    "HTTP": 200
+  }
+}

@@ -10,7 +10,7 @@ Un Healthcheck consta de un comando que se ejecuta periódicamente dentro del co
 ```
 Define el comando que se ejecutará para verificar el estado del contenedor. Este comando depende del tipo de aplicación que se está ejecutando en el contenedor y de la mejor manera de verificar su estado de salud. 
 
-El **|| exit 1** se utiliza para asegurarse de que el comando retorne un código de salida diferente de 0 si la verificación de salud falla. Esto es importante porque Docker interpreta un código de salida diferente de 0 como un fallo en el Healthcheck, lo que puede llevar a que Docker marque el contenedor como no saludable y tome las medidas configuradas por ejemplo reiniciar el contenedor.
+El **|| exit 1** hace que la comprobación devuelva 1 cuando falla. Docker puede marcar el contenedor como `unhealthy`, pero eso por sí solo no reinicia un contenedor independiente. Las políticas de reinicio reaccionan a la salida del proceso principal.
 Si no se incluye || exit 1, el comando debe ser cuidadosamente diseñado para devolver un código de salida diferente de 0 en caso de fallo, de lo contrario Docker puede interpretar incorrectamente el estado de salud del contenedor.
 ### Ejemplos de comandos para verificar el estado del contenedor
 Para un servidor web (usando curl):
@@ -41,17 +41,17 @@ Si necesitas comprobar que un puerto está abierto:
 --health-cmd="nc -z localhost 8080 || exit 1"
 
 ### Intervalo de Healthcheck 
-Establece el intervalo entre las ejecuciones del comando de verificación de estado. El valor se especifica en una unidad ms para milisegundos, s para segundos, m para minutos, h para horas, y d para días. Para establecer un buen intervalo de Healthcheck es importante considerar varios factores para garantizar una monitorización efectiva sin afectar el rendimiento del sistema. 
+Establece el intervalo entre las ejecuciones del comando de verificación de estado. Se pueden usar duraciones como `500ms`, `3s`, `1m` o `1h`; para un día se escribe `24h`. Para establecer el intervalo hay que considerar el tiempo de respuesta de la aplicación.
 
 - Frecuencia adecuada: El intervalo debe ser lo suficientemente frecuente como para detectar problemas de salud rápidamente, pero no tan frecuente como para crear una carga innecesaria en el sistema. Un intervalo de 30 segundos a 1 minuto suele ser razonable para la mayoría de las aplicaciones.
 
 - Tiempo suficiente para recuperarse: El intervalo debe permitir que la aplicación se recupere si experimenta problemas temporales. Por ejemplo, si una aplicación tarda 20 segundos en reiniciarse después de un fallo, el intervalo debe ser mayor que 20 segundos para permitir que la aplicación se reinicie completamente antes del siguiente chequeo.
 
-- Considerar el tiempo de timeout: Asegúrate de que el intervalo sea mayor que el tiempo de timeout (--health-timeout). Si el intervalo es menor que el tiempo de timeout, los chequeos de salud podrían acumularse y causar problemas si la aplicación no responde rápidamente.
+- Considerar el tiempo de timeout: Docker espera el intervalo después de que termina la comprobación anterior. Las comprobaciones periódicas de un mismo contenedor no se acumulan por configurar un intervalo menor que el timeout.
 
 - Ajuste según las necesidades: El intervalo puede variar según la aplicación y su criticidad. Aplicaciones críticas pueden requerir intervalos más cortos para detectar problemas rápidamente, mientras que aplicaciones menos críticas pueden funcionar bien con intervalos más largos para reducir la carga en el sistema.
 ```
- --health-interval = <valor><unidad>
+--health-interval=<valor><unidad>
 ```
 
 ### Timeout
@@ -74,5 +74,27 @@ Define un período de gracia inicial durante el cual los fallos del Healthcheck 
 _Puedes copiar y ejecutar directamente el comando_
 
 ```
-docker run -d --name server-nginx --health-cmd="curl http://localhost" --health-interval=3s --health-start-period=5s --health-retries=3 --health-timeout=10s nginx:alpine
+docker run -d --name server-nginx --health-cmd="curl -f http://localhost/ || exit 1" --health-interval=3s --health-start-period=5s --health-retries=3 --health-timeout=10s nginx:alpine
 ```
+
+`localhost` se refiere al propio contenedor. `curl -f` devuelve un error cuando recibe una respuesta HTTP de error, como 403 o 500.
+
+### Prueba realizada
+
+```powershell
+docker inspect server-nginx --format '{{.State.Health.Status}}'
+docker exec server-nginx mv /usr/share/nginx/html/index.html /tmp/index-healthcheck.html
+docker inspect server-nginx --format '{{json .State.Health}}'
+docker exec server-nginx mv /tmp/index-healthcheck.html /usr/share/nginx/html/index.html
+docker inspect server-nginx --format '{{.State.Health.Status}}'
+```
+
+Se esperó a que Docker registrara cada cambio antes de consultar el estado.
+
+| Situación | Estado | Código de la comprobación | Reinicios |
+| --- | --- | --- | --- |
+| Página disponible | `healthy` | 0 | 0 |
+| Sin index.html, Nginx devuelve 403 | `unhealthy` después de 3 fallos consecutivos | 1 | 0 |
+| Archivo restaurado | `healthy` | 0 | 0 |
+
+El contenedor siguió encendido durante el fallo. Al devolver el archivo a su lugar, la comprobación volvió a pasar.
